@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { usePlatformName } from '@/context/PlatformNameContext'
 
 export function RegisterPage() {
   const navigate = useNavigate()
+  const { platformName } = usePlatformName()
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -106,7 +108,7 @@ export function RegisterPage() {
               Create your account
             </h1>
             <p className="text-muted-foreground text-sm">
-              Join Velocity Vertex and start trading smarter.
+              Join {platformName} and start trading smarter.
             </p>
           </div>
 

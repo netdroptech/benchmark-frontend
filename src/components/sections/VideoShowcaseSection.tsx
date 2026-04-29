@@ -1,9 +1,11 @@
 import { useState, useRef } from 'react'
 import { ChevronRight, Volume2, VolumeX } from 'lucide-react'
+import { usePlatformName } from '@/context/PlatformNameContext'
 
 export function VideoShowcaseSection() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isMuted, setIsMuted] = useState(true)
+  const { platformName } = usePlatformName()
 
   const toggleSound = () => {
     if (videoRef.current) {
@@ -58,7 +60,7 @@ export function VideoShowcaseSection() {
               lineHeight: 1.6,
             }}
           >
-            Watch how traders use Velocity Vertex to execute strategies, monitor markets, and grow their portfolios.
+            Watch how traders use {platformName} to execute strategies, monitor markets, and grow their portfolios.
           </p>
         </div>
 

@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { PLATFORM_NAME, SUPPORT_EMAIL } from '../config/platform'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api'
 const PRINCIPAL_KEY = 'Principal@Apex#2026'
 
-const DEFAULT_NAME  = 'Velocity Vertex'
-const DEFAULT_EMAIL = 'support@velocityvertex.com'
+const DEFAULT_NAME  = PLATFORM_NAME
+const DEFAULT_EMAIL = SUPPORT_EMAIL
 
 type PlatformSettingsContextType = {
   platformName: string
