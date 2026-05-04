@@ -19,7 +19,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'dist-v15',
+    outDir: 'dist',pw
     emptyOutDir: false,
     commonjsOptions: {
       include: [/node_modules/],
