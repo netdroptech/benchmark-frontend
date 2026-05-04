@@ -19,14 +19,12 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'dist',pw
+    outDir: 'dist',
     emptyOutDir: false,
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true,
     },
-    rollupOptions: {
-      maxParallelFileOps: 5,
-    },
+   
   },
 })
