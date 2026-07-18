@@ -6,7 +6,7 @@ import logoImg from '@/assets/logo.png'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import {
   LayoutDashboard, FileText, TrendingUp, Briefcase, BarChart2,
-  Activity, Bot, Zap, Download, ArrowUpRight, Menu, LogOut,
+  Activity, Copy, Bot, Zap, Download, ArrowUpRight, Menu, LogOut,
   Bell, Settings, Building2, CandlestickChart, UserCircle2, KeyRound,
   SlidersHorizontal, ShieldCheck, CreditCard, Globe, Lock, HelpCircle,
   ChevronRight as ChevronRight2, Clock, HeadphonesIcon, ShieldOff,
@@ -33,6 +33,7 @@ const NAV = [
     section: 'TRADING & MARKETS',
     items: [
       { label: 'Live Markets',      path: '/dashboard/markets',           icon: Activity,  badge: { label: 'Live',    color: '#16a34a', bg: 'rgba(22,163,74,0.15)' } },
+      { label: 'Copy Traders',      path: '/dashboard/copy-trading',      icon: Copy,      badge: { label: 'Pro',     color: '#a78bfa', bg: 'rgba(167,139,250,0.15)' } },
       { label: 'AI Trading Bots',   path: '/dashboard/ai-bots',           icon: Bot,       badge: { label: 'AI',      color: '#94a3b8', bg: 'rgba(148,163,184,0.15)' } },
     ],
   },
