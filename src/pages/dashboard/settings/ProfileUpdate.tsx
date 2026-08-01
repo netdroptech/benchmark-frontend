@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowLeft, Save, Mail, Phone, MapPin, Flag, Calendar, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { api } from '../../../lib/api'
+import { useAuth } from '../../../context/AuthContext'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', height: 42, paddingLeft: 38, paddingRight: 14,
@@ -38,15 +40,59 @@ const OCCUPATIONS = ['Investor', 'Trader', 'Engineer', 'Business Owner', 'Financ
 
 export function ProfileUpdate() {
   const navigate = useNavigate()
+  const { user, refreshUser } = useAuth()
   const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   const [form, setForm] = useState({
-    firstName: 'Edwin', lastName: '', email: 'netdroptech@gmail.com',
-    phone: '', dob: '', nationality: 'Nigeria', occupation: 'Investor',
+    firstName: '', lastName: '', email: '',
+    phone: '', dob: '', nationality: 'United States', occupation: 'Investor',
     address: '', city: '', state: '', postalCode: '', country: 'Nigeria',
   })
 
+  // Prefill from the authenticated user once it's loaded
+  useEffect(() => {
+    if (!user) return
+    setForm(f => ({
+      ...f,
+      firstName:  user.firstName ?? '',
+      lastName:   user.lastName ?? '',
+      email:      user.email ?? '',
+      phone:      user.phone ?? '',
+      dob:        (user as any).dateOfBirth ? String((user as any).dateOfBirth).slice(0, 10) : '',
+      country:    user.country ?? f.country,
+      address:    (user as any).address ?? '',
+      city:       (user as any).city ?? '',
+      postalCode: (user as any).postalCode ?? '',
+    }))
+  }, [user])
+
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
+
+  async function handleSave() {
+    setSaving(true)
+    setError('')
+    try {
+      await api.put('/user/profile', {
+        firstName:   form.firstName,
+        lastName:    form.lastName,
+        phone:       form.phone,
+        dateOfBirth: form.dob || null,
+        address:     form.address,
+        city:        form.city,
+        postalCode:  form.postalCode,
+        country:     form.country,
+      })
+      await refreshUser()
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to save changes.')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const selectStyle: React.CSSProperties = { ...inputStyle, appearance: 'none' as const }
 
@@ -69,7 +115,7 @@ export function ProfileUpdate() {
             <input style={inputStyle} value={form.firstName} onChange={set('firstName')} placeholder="First name" />
           </Field>
           <Field label="Last Name" icon={User}>
-            <input style={inputStyle} value={form.lastName} onChange={set('lastName')} placeholder="Last name" />
+            <input style={inputStyle} value={form.lastName} onChange={set('lastName')} placeholder="John Doe" />
           </Field>
           <Field label="Date of Birth" icon={Calendar}>
             <input type="date" style={inputStyle} value={form.dob} onChange={set('dob')} />
@@ -123,10 +169,11 @@ export function ProfileUpdate() {
         </Field>
       </Card>
 
+      {error && <p style={{ fontSize: 12, color: '#f87171', textAlign: 'right', marginBottom: 10 }}>{error}</p>}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
         <button onClick={() => navigate(-1)} style={{ padding: '10px 22px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'hsl(240 5% 55%)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-        <button onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 3000) }} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 22px', borderRadius: 10, background: saved ? 'rgba(74,222,128,0.15)' : 'linear-gradient(135deg,#16a34a,#15803d)', border: saved ? '1px solid rgba(74,222,128,0.3)' : 'none', color: saved ? '#4ade80' : '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-          <Save size={14} /> {saved ? 'Saved!' : 'Save Changes'}
+        <button onClick={handleSave} disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 22px', borderRadius: 10, background: saved ? 'rgba(74,222,128,0.15)' : 'linear-gradient(135deg,#16a34a,#15803d)', border: saved ? '1px solid rgba(74,222,128,0.3)' : 'none', color: saved ? '#4ade80' : '#fff', fontSize: 13, fontWeight: 700, cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.7 : 1 }}>
+          <Save size={14} /> {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Changes'}
         </button>
       </div>
     </div>

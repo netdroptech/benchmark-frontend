@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Camera, User, AtSign, FileText, Twitter, Linkedin, Globe, Save, ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { api } from '../../../lib/api'
+import { useAuth } from '../../../context/AuthContext'
 
 function SettingsCard({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
   return (
@@ -34,22 +36,57 @@ const inputStyle: React.CSSProperties = {
 
 export function ProfileSettings() {
   const navigate = useNavigate()
+  const { user, refreshUser } = useAuth()
   const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   const [form, setForm] = useState({
-    displayName: 'Edwin',
-    username:    'edwin_apex',
-    bio:         'Investor & trader. Building wealth one asset at a time.',
-    twitter:     '@edwintrader',
-    linkedin:    'linkedin.com/in/edwin',
+    displayName: '',
+    username:    '',
+    bio:         '',
+    twitter:     '',
+    linkedin:    '',
     website:     '',
   })
+
+  // Prefill from the authenticated user once it's loaded
+  useEffect(() => {
+    if (!user) return
+    const u = user as any
+    setForm(f => ({
+      ...f,
+      displayName: u.displayName ?? [u.firstName, u.lastName].filter(Boolean).join(' '),
+      username:    u.username ?? '',
+      bio:         u.bio ?? '',
+      twitter:     u.twitter ?? '',
+      linkedin:    u.linkedin ?? '',
+      website:     u.website ?? '',
+    }))
+  }, [user])
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
 
-  function handleSave() {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+  async function handleSave() {
+    setSaving(true)
+    setError('')
+    try {
+      await api.put('/user/profile', {
+        displayName: form.displayName,
+        username:    form.username,
+        bio:         form.bio,
+        twitter:     form.twitter,
+        linkedin:    form.linkedin,
+        website:     form.website,
+      })
+      await refreshUser()
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to save changes.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const THEMES = [
@@ -173,10 +210,11 @@ export function ProfileSettings() {
       </SettingsCard>
 
       {/* Save */}
+      {error && <p style={{ fontSize: 12, color: '#f87171', textAlign: 'right', marginBottom: 10 }}>{error}</p>}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
         <button onClick={() => navigate(-1)} style={{ padding: '10px 22px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'hsl(240 5% 55%)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-        <button onClick={handleSave} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 22px', borderRadius: 10, background: saved ? 'rgba(74,222,128,0.15)' : 'linear-gradient(135deg,#16a34a,#15803d)', border: saved ? '1px solid rgba(74,222,128,0.3)' : 'none', color: saved ? '#4ade80' : '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}>
-          <Save size={14} /> {saved ? 'Saved!' : 'Save Changes'}
+        <button onClick={handleSave} disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 22px', borderRadius: 10, background: saved ? 'rgba(74,222,128,0.15)' : 'linear-gradient(135deg,#16a34a,#15803d)', border: saved ? '1px solid rgba(74,222,128,0.3)' : 'none', color: saved ? '#4ade80' : '#fff', fontSize: 13, fontWeight: 700, cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.7 : 1, transition: 'all 0.2s' }}>
+          <Save size={14} /> {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Changes'}
         </button>
       </div>
     </div>

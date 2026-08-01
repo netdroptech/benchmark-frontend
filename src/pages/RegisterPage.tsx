@@ -123,7 +123,7 @@ export function RegisterPage() {
                   name="firstName"
                   type="text"
                   autoComplete="given-name"
-                  placeholder="Edwin"
+                  placeholder="John"
                   value={form.firstName}
                   onChange={handleChange}
                   required
