@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { ArrowUpRight, Clock, Shield, CheckCircle, AlertCircle, ChevronDown, Lock, Loader2, KeyRound } from 'lucide-react'
+import { ArrowUpRight, Clock, Shield, CheckCircle, AlertCircle, ChevronDown, Lock, Loader2, KeyRound, ShieldCheck, X } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 
@@ -56,6 +57,9 @@ function Card({ children, style = {} }: { children: React.ReactNode; style?: Rea
 
 export function WithdrawalFunds() {
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const kycApproved = user?.kycStatus === 'APPROVED'
+  const [showKycModal, setShowKycModal] = useState(false)
 
   const [method, setMethod]     = useState('crypto')
   const [coin, setCoin]         = useState('USDT (TRC-20)')
@@ -123,6 +127,12 @@ export function WithdrawalFunds() {
 
   function handleSubmit() {
     setFormError('')
+
+    // KYC gate — identity must be verified before the first (or any) withdrawal.
+    if (!kycApproved) {
+      setShowKycModal(true)
+      return
+    }
 
     if (numAmount <= 0) {
       setFormError('Please enter a withdrawal amount.')
@@ -324,6 +334,61 @@ export function WithdrawalFunds() {
 
   return (
     <div className="p-4 md:p-6 max-w-[900px] mx-auto overflow-x-hidden">
+
+      {/* ── KYC-required popup ── */}
+      {showKycModal && (
+        <div
+          onClick={() => setShowKycModal(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: 420, background: 'hsl(260 60% 6%)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '1rem', padding: '1.75rem', position: 'relative', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+          >
+            <button
+              onClick={() => setShowKycModal(false)}
+              style={{ position: 'absolute', top: 14, right: 14, background: 'transparent', border: 'none', color: 'hsl(240 5% 55%)', cursor: 'pointer', padding: 4 }}
+              aria-label="Close"
+            >
+              <X size={18} />
+            </button>
+            <div style={{ width: 52, height: 52, borderRadius: '0.75rem', background: 'rgba(245,158,11,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+              <ShieldCheck size={24} style={{ color: '#f59e0b' }} />
+            </div>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'hsl(40 6% 95%)', marginBottom: 8 }}>Identity verification required</h2>
+            <p style={{ fontSize: 13.5, lineHeight: 1.55, color: 'hsl(240 5% 62%)', marginBottom: 20 }}>
+              {user?.kycStatus === 'PENDING'
+                ? 'Your KYC documents are under review. You can withdraw as soon as your identity is approved — this usually takes up to 24 hours.'
+                : 'Before you can make your first withdrawal, we need to verify your identity. It only takes about 2 minutes.'}
+            </p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              {user?.kycStatus === 'PENDING' ? (
+                <button
+                  onClick={() => setShowKycModal(false)}
+                  style={{ flex: 1, padding: '0.75rem', borderRadius: '0.625rem', background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', color: '#1a1305', fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer' }}
+                >
+                  Got it
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setShowKycModal(false)}
+                    style={{ padding: '0.75rem 1rem', borderRadius: '0.625rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'hsl(40 6% 80%)', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}
+                  >
+                    Later
+                  </button>
+                  <button
+                    onClick={() => { setShowKycModal(false); navigate('/kyc') }}
+                    style={{ flex: 1, padding: '0.75rem', borderRadius: '0.625rem', background: 'linear-gradient(135deg, #88fc8a 0%, #00ff04 100%)', color: '#050505', fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(136,252,138,0.2)' }}
+                  >
+                    Verify Identity
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div className="mb-6">

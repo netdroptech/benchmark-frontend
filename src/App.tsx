@@ -88,7 +88,7 @@ function KYCRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-// Redirects users with unapproved KYC to /kyc or /kyc-pending.
+// Redirects unauthenticated / banned users. KYC is NOT gated here (see withdrawal).
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth()
   const location = useLocation()
@@ -104,10 +104,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   // Banned users can only see the banned page
   if (user.status === 'BANNED') return <Navigate to="/banned" replace />
 
-  if (user.kycStatus === 'NOT_SUBMITTED') return <Navigate to="/kyc"         replace />
-  if (user.kycStatus === 'PENDING')       return <Navigate to="/kyc-pending"  replace />
-  if (user.kycStatus === 'REJECTED')      return <Navigate to="/kyc"          replace />
-
+  // NOTE: KYC is no longer required to access the dashboard. Users can browse
+  // freely after registering; KYC is enforced only at withdrawal time.
   return <>{children}</>
 }
 
@@ -155,7 +153,7 @@ function App() {
       <Route path="/verify-email"   element={<VerifyEmailPage />} />
       <Route path="/banned"          element={<BannedPage />} />
 
-      {/* Dashboard — nested routes (KYC-gated) */}
+      {/* Dashboard — nested routes (KYC enforced at withdrawal, not here) */}
       <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
         <Route index element={<DashboardHome />} />
         <Route path="statement"    element={<AccountStatement />} />
