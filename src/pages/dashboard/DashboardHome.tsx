@@ -4,7 +4,7 @@ import {
   Wallet, TrendingUp, Download, ArrowUpRight, Gift,
   Shield, X, Link as LinkIcon, AlertCircle, RefreshCw,
   ChevronDown, CheckCircle2, Clock, XCircle, Loader2,
-  WalletCards, Zap, Crown, Sparkles, ChevronRight,
+  WalletCards, Zap, Crown, Sparkles, ChevronRight, Activity,
 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
@@ -18,6 +18,7 @@ interface UserStats {
   totalProfit:      number
   totalBonus:       number
   kycStatus:        string
+  signalStrength:   number
 }
 
 interface Transaction {
@@ -219,6 +220,7 @@ export function DashboardHome() {
   const withdrawals = stats?.totalWithdrawals ?? 0
   const profit   = stats?.totalProfit      ?? 0
   const bonus    = stats?.totalBonus       ?? 0
+  const signalStrength = Math.max(0, Math.min(100, stats?.signalStrength ?? 0))
   const kycStatus = stats?.kycStatus ?? user?.kycStatus ?? 'NOT_SUBMITTED'
   const firstName = user?.firstName ?? ''
   const lastName  = user?.lastName  ?? ''
@@ -228,6 +230,8 @@ export function DashboardHome() {
     <div className="p-4 md:p-6 max-w-[1400px] mx-auto overflow-x-hidden">
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes sig-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+        @keyframes sig-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
         @media (max-width: 767px) {
           .dash-stats-grid { grid-template-columns: 1fr !important; grid-template-rows: auto !important; }
           .dash-stats-grid > *[style*="gridRow"] { grid-row: auto !important; }
@@ -278,6 +282,52 @@ export function DashboardHome() {
           </button>
         </div>
       </div>
+
+      {/* ── Signal Strength ── */}
+      <Card style={{ padding: '1.25rem 1.5rem', marginBottom: '1.25rem' }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+          <div className="flex items-center gap-2">
+            <div style={{
+              width: 30, height: 30, borderRadius: '0.5rem',
+              background: 'rgba(96,165,250,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              animation: 'sig-pulse 2s ease-in-out infinite',
+            }}>
+              <Activity size={15} style={{ color: '#60a5fa' }} />
+            </div>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 600, color: 'hsl(40 6% 92%)' }}>Signal Strength</p>
+              <p style={{ fontSize: 12, color: 'hsl(240 5% 55%)' }}>Live market signal accuracy for your account</p>
+            </div>
+          </div>
+          <span style={{
+            fontSize: 20, fontWeight: 700,
+            color: signalStrength >= 66 ? '#4ade80' : signalStrength >= 33 ? '#f59e0b' : '#f87171',
+            transition: 'color 0.4s ease',
+          }}>{signalStrength}%</span>
+        </div>
+        <div style={{ position: 'relative', width: '100%', height: 10, borderRadius: 999, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+          <div style={{
+            position: 'relative',
+            height: '100%',
+            width: `${signalStrength}%`,
+            borderRadius: 999,
+            background: signalStrength >= 66
+              ? 'linear-gradient(90deg,#22c55e,#4ade80)'
+              : signalStrength >= 33
+              ? 'linear-gradient(90deg,#d97706,#f59e0b)'
+              : 'linear-gradient(90deg,#dc2626,#f87171)',
+            transition: 'width 1.1s cubic-bezier(0.22,1,0.36,1), background 0.4s ease',
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent)',
+              animation: 'sig-shimmer 1.8s ease-in-out infinite',
+            }} />
+          </div>
+        </div>
+      </Card>
 
       {/* ── Stats grid ── */}
       <div className="grid gap-4 mb-5 dash-stats-grid" style={{ gridTemplateColumns: '1.15fr 1fr 1fr', gridTemplateRows: 'auto auto' }}>

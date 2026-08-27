@@ -28,6 +28,7 @@ interface UserDetail {
   totalDeposits:    number
   totalWithdrawals: number
   totalProfit:      number
+  signalStrength:   number
   createdAt:        string
   lastLoginAt?:     string
   transactions:     Tx[]
@@ -865,6 +866,11 @@ export function AdminUserDetail() {
               {editing
                 ? <input style={inp} type="number" min="0" step="any" value={form.totalProfit ?? user.totalProfit} onChange={e => setForm(f => ({ ...f, totalProfit: Number(e.target.value) }))} />
                 : <p style={{ fontSize: 13, color: 'hsl(40 6% 85%)', padding: '8px 0' }}>{fmt(user.totalProfit)}</p>}
+            </Field>
+            <Field label="Signal Strength (%)">
+              {editing
+                ? <input style={inp} type="number" min="0" max="100" step="1" value={form.signalStrength ?? user.signalStrength ?? 0} onChange={e => setForm(f => ({ ...f, signalStrength: Math.max(0, Math.min(100, Number(e.target.value))) }))} />
+                : <p style={{ fontSize: 13, fontWeight: 700, color: '#60a5fa', padding: '8px 0' }}>{user.signalStrength ?? 0}%</p>}
             </Field>
           </div>
 
