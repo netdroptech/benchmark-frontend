@@ -3,23 +3,24 @@ import { useNavigate } from 'react-router-dom'
 import { TrendingUp, TrendingDown, ChevronRight, RefreshCw, Search, Star, BarChart2, Wifi, WifiOff } from 'lucide-react'
 
 // ── Static metadata (colors, names, pairs) ────────────────────────────────
-const PAIR_META: Record<string, { pair: string; name: string; color: string }> = {
-  BTCUSDT:   { pair: 'BTC/USDT',   name: 'Bitcoin',       color: '#f7931a' },
-  ETHUSDT:   { pair: 'ETH/USDT',   name: 'Ethereum',      color: '#627eea' },
-  BNBUSDT:   { pair: 'BNB/USDT',   name: 'BNB',           color: '#f3ba2f' },
-  ADAUSDT:   { pair: 'ADA/USDT',   name: 'Cardano',       color: '#4a9eff' },
-  XRPUSDT:   { pair: 'XRP/USDT',   name: 'XRP',           color: '#00aae4' },
-  SOLUSDT:   { pair: 'SOL/USDT',   name: 'Solana',        color: '#9945ff' },
-  DOTUSDT:   { pair: 'DOT/USDT',   name: 'Polkadot',      color: '#e6007a' },
-  DOGEUSDT:  { pair: 'DOGE/USDT',  name: 'Dogecoin',      color: '#c2a633' },
-  AVAXUSDT:  { pair: 'AVAX/USDT',  name: 'Avalanche',     color: '#e84142' },
-  MATICUSDT: { pair: 'MATIC/USDT', name: 'Polygon',       color: '#8247e5' },
-  LINKUSDT:  { pair: 'LINK/USDT',  name: 'Chainlink',     color: '#375bd2' },
-  LTCUSDT:   { pair: 'LTC/USDT',   name: 'Litecoin',      color: '#bfbbbb' },
-  UNIUSDT:   { pair: 'UNI/USDT',   name: 'Uniswap',       color: '#ff007a' },
-  ATOMUSDT:  { pair: 'ATOM/USDT',  name: 'Cosmos',        color: '#6f7390' },
-  NEARUSDT:  { pair: 'NEAR/USDT',  name: 'NEAR Protocol', color: '#00ec97' },
-  APTUSDT:   { pair: 'APT/USDT',   name: 'Aptos',         color: '#00bcd4' },
+const PAIR_META: Record<string, { pair: string; name: string; color: string; cmcId: number }> = {
+  BTCUSDT:   { pair: 'BTC/USDT',   name: 'Bitcoin',        color: '#f7931a', cmcId: 1     },
+  ETHUSDT:   { pair: 'ETH/USDT',   name: 'Ethereum',       color: '#627eea', cmcId: 1027  },
+  BNBUSDT:   { pair: 'BNB/USDT',   name: 'BNB',            color: '#f3ba2f', cmcId: 1839  },
+  ADAUSDT:   { pair: 'ADA/USDT',   name: 'Cardano',        color: '#4a9eff', cmcId: 2010  },
+  XRPUSDT:   { pair: 'XRP/USDT',   name: 'XRP',            color: '#00aae4', cmcId: 52    },
+  SOLUSDT:   { pair: 'SOL/USDT',   name: 'Solana',         color: '#9945ff', cmcId: 5426  },
+  DOTUSDT:   { pair: 'DOT/USDT',   name: 'Polkadot',       color: '#e6007a', cmcId: 6636  },
+  DOGEUSDT:  { pair: 'DOGE/USDT',  name: 'Dogecoin',       color: '#c2a633', cmcId: 74    },
+  AVAXUSDT:  { pair: 'AVAX/USDT',  name: 'Avalanche',      color: '#e84142', cmcId: 5805  },
+  MATICUSDT: { pair: 'MATIC/USDT', name: 'Polygon',        color: '#8247e5', cmcId: 3890  },
+  LINKUSDT:  { pair: 'LINK/USDT',  name: 'Chainlink',      color: '#375bd2', cmcId: 1975  },
+  LTCUSDT:   { pair: 'LTC/USDT',   name: 'Litecoin',       color: '#bfbbbb', cmcId: 2     },
+  UNIUSDT:   { pair: 'UNI/USDT',   name: 'Uniswap',        color: '#ff007a', cmcId: 7083  },
+  ATOMUSDT:  { pair: 'ATOM/USDT',  name: 'Cosmos',         color: '#6f7390', cmcId: 3794  },
+  NEARUSDT:  { pair: 'NEAR/USDT',  name: 'NEAR Protocol',  color: '#00ec97', cmcId: 6535  },
+  APTUSDT:   { pair: 'APT/USDT',   name: 'Aptos',          color: '#00bcd4', cmcId: 21794 },
+  TRUMPUSDT: { pair: 'TRUMP/USDT', name: 'OFFICIAL TRUMP', color: '#d4af37', cmcId: 35336 },
 }
 
 const SYMBOLS = Object.keys(PAIR_META)
@@ -42,6 +43,7 @@ const SEED: PairData[] = [
   { symbol: 'ATOMUSDT',  price: 4.219,     change: -0.62, volume:    17_334_005 },
   { symbol: 'NEARUSDT',  price: 2.448,     change: 6.11,  volume:    44_221_987 },
   { symbol: 'APTUSDT',   price: 4.987,     change: 3.22,  volume:    26_448_991 },
+  { symbol: 'TRUMPUSDT', price: 9.85,      change: 2.41,  volume:   118_224_530 },
 ]
 
 interface PairData {
@@ -89,17 +91,30 @@ function fmtCountdown(s: number) {
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────
-function CoinIcon({ symbol, color }: { symbol: string; color: string }) {
+function CoinIcon({ symbol, color, cmcId }: { symbol: string; color: string; cmcId?: number }) {
+  const [failed, setFailed] = useState(false)
   const letter = symbol.replace('USDT', '').charAt(0)
+  const showLogo = !!cmcId && !failed
   return (
     <div style={{
-      width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
-      background: `linear-gradient(135deg, ${color}55 0%, ${color}22 100%)`,
+      width: 38, height: 38, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
+      background: showLogo ? '#0b0b10' : `linear-gradient(135deg, ${color}55 0%, ${color}22 100%)`,
       border: `1.5px solid ${color}44`,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontSize: 13, fontWeight: 800, color,
     }}>
-      {letter}
+      {showLogo ? (
+        <img
+          src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${cmcId}.png`}
+          alt={symbol}
+          width={38}
+          height={38}
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          onError={() => setFailed(true)}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      ) : letter}
     </div>
   )
 }
@@ -436,7 +451,7 @@ export function TradingMarkets() {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2.5">
-                    <CoinIcon symbol={pair.symbol} color={pair.color} />
+                    <CoinIcon symbol={pair.symbol} color={pair.color} cmcId={pair.cmcId} />
                     <div>
                       <p style={{ fontSize: 13.5, fontWeight: 700, color: 'hsl(40 10% 94%)', lineHeight: 1.2 }}>
                         {pair.symbol}
