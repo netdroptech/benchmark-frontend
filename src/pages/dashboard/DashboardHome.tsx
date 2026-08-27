@@ -458,7 +458,7 @@ export function DashboardHome() {
             </div>
             {kycStatus !== 'PENDING' && (
               <button
-                onClick={() => navigate('/dashboard/kyc')}
+                onClick={() => navigate('/kyc')}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '0.375rem',
                   padding: '0.5rem 1rem', borderRadius: '0.6rem',
