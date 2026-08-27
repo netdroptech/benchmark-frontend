@@ -3,7 +3,6 @@ import { AuthProvider, useAuth } from '@/context/AuthContext'
 import { LogoProvider } from '@/context/LogoContext'
 import { PlatformNameProvider } from '@/context/PlatformNameContext'
 import { LiveChatProvider } from '@/context/LiveChatContext'
-import { LiveChatInjector } from '@/components/ui/LiveChatInjector'
 import { FaviconProvider } from '@/context/FaviconContext'
 import { FaviconInjector } from '@/components/ui/FaviconInjector'
 import { PrincipalLogin } from '@/pages/principal/PrincipalLogin'
@@ -136,7 +135,6 @@ function App() {
     <LogoProvider>
     <AuthProvider>
     <FaviconInjector />
-    <LiveChatInjector />
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/about" element={<AboutPage />} />
